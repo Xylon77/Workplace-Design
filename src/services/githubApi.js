@@ -1,14 +1,44 @@
 const BASE_URL = 'https://api.github.com';
+const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
+const REQUEST_TIMEOUT_MS = 8000;
 
 // Helper to handle API responses
 async function request(endpoint) {
-  const response = await fetch(`${BASE_URL}${endpoint}`);
-  
-  if (!response.ok) {
-    throw new Error(`GitHub API Error: ${response.statusText}`);
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/vnd.github+json',
+        ...(GITHUB_TOKEN ? { Authorization: `Bearer ${GITHUB_TOKEN}` } : {}),
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    });
+
+    if (!response.ok) {
+      let message = `GitHub API Error: ${response.status} ${response.statusText}`;
+
+      if (response.status === 403) {
+        message = 'GitHub API rate limit reached or access denied. Add VITE_GITHUB_TOKEN to your environment to authenticate requests.';
+      }
+
+      throw new Error(message);
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('GitHub API request timed out. Check your network connection or add VITE_GITHUB_TOKEN for authenticated access.', { cause: error });
+    }
+
+    throw new Error(error instanceof Error ? error.message : 'GitHub API request failed.', {
+      cause: error,
+    });
+  } finally {
+    window.clearTimeout(timeoutId);
   }
-  
-  return response.json();
 }
 
 // Module 2 & 3: Fetch User Data

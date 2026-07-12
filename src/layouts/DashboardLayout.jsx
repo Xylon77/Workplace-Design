@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar'; // Import the new sidebar
+import Sidebar from '../component/Sidebar.jsx'; // Import the new sidebar
 import { useAuth } from '../hooks/useAuth';
 
 function DashboardLayout() {
@@ -27,7 +27,7 @@ function DashboardLayout() {
   </div>
 
   {/* Main content fills the rest */}
-  <main className="flex-1 overflow-y-auto p-8">
+  <main className="flex-1 overflow-y-auto p-4 md:p-8">
     <Outlet />
   </main>
 </div>

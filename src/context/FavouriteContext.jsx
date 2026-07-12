@@ -1,17 +1,7 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { FavoritesContext } from './createFavoritesContext';
 import { useNotifications } from '../hooks/useNotifications';
 
-// 1. Hook for components to access the favorites state
-export const useFavorites = () => {
-  const context = useContext(FavoritesContext);
-  if (!context) {
-    throw new Error("useFavorites must be used within a FavoritesProvider");
-  }
-  return context;
-};
-
-// 2. Provider component that wraps your app
 export function FavoritesProvider({ children }) {
   const { addNotification } = useNotifications();
   
@@ -19,7 +9,7 @@ export function FavoritesProvider({ children }) {
     const saved = localStorage.getItem('dev_favorites');
     try {
       return saved ? JSON.parse(saved) : { users: [], repos: [] };
-    } catch (e) {
+    } catch {
       return { users: [], repos: [] };
     }
   });

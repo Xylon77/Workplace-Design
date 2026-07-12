@@ -1,13 +1,5 @@
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { AuthContext } from './CreateAuthContext';
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
 
 export function AuthProvider({ children }) {
   // Initialize currentUser from localStorage synchronously (no effect needed)

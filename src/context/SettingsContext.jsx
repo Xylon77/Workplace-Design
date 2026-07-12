@@ -1,6 +1,5 @@
-import { createContext, useState, useContext, useEffect } from 'react';
-
-export const SettingsContext = createContext();
+import { useState, useEffect } from 'react';
+import { SettingsContext } from './createSettingsContext';
 
 export function SettingsProvider({ children }) {
   const [settings, setSettings] = useState(() => {
@@ -11,7 +10,6 @@ export function SettingsProvider({ children }) {
   const updateSettings = (newSettings) => {
     setSettings(prev => {
       const updated = { ...prev, ...newSettings };
-      console.log("Settings updated:", updated); // Check console when clicking buttons
       localStorage.setItem('github_workspace_settings', JSON.stringify(updated));
       return updated;
     });
@@ -32,5 +30,3 @@ export function SettingsProvider({ children }) {
     </SettingsContext.Provider>
   );
 }
-
-export const useSettings = () => useContext(SettingsContext);

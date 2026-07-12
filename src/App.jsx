@@ -9,10 +9,10 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import Collections from './pages/Collections/Collections.jsx';
 import Search from './pages/Search/Search.jsx'; 
 import UserDetails from './pages/UserDetails/UserDetails.jsx';
-import { FavoritesProvider } from './context/FavoritesContext.jsx';
+import { FavoritesProvider } from './context/FavouriteContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
 import { SettingsProvider } from './context/SettingsContext.jsx';
-import Favorites from './pages/Favorites/Favorites';
+import Favorites from './pages/Favourites/Favourites.jsx';
 import Notifications from './pages/Notifications/Notifications';
 import Settings from './pages/Settings/Settings';
 

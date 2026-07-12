@@ -1,4 +1,4 @@
-import { useReducer, useContext } from 'react';
+import { useReducer } from 'react';
 import { NotificationContext } from './createNotificationContext';
 
 const notificationReducer = (state, action) => {
@@ -15,14 +15,6 @@ const notificationReducer = (state, action) => {
     default:
       return state;
   }
-};
-
-export const useNotifications = () => {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
-  }
-  return context;
 };
 
 export function NotificationProvider({ children }) {

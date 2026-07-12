@@ -1,4 +1,4 @@
-import { useSettings } from '../context/SettingsContext';
+import { useSettings } from '../hooks/useThemeSettings';
 
 export default function ThemeToggle() {
   const { settings, updateSettings } = useSettings();

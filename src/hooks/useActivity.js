@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export function useActivity() {
   const [activity, setActivity] = useState(() => {
@@ -6,13 +6,13 @@ export function useActivity() {
     return saved ? JSON.parse(saved) : { users: [], repos: [], terms: [] };
   });
 
-  const addActivity = (type, item) => {
+  const addActivity = useCallback((type, item) => {
     setActivity(prev => {
       // Prevent duplicates and limit to last 5 items
       const updatedList = [item, ...prev[type].filter(i => i.id !== item.id)].slice(0, 5);
       return { ...prev, [type]: updatedList };
     });
-  };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('dev_activity', JSON.stringify(activity));

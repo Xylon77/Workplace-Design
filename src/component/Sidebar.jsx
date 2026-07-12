@@ -4,9 +4,6 @@ import { Link } from 'react-router-dom';
 
 export default function Sidebar({ isActive, handleLogout, currentUser }) {
   const [isOpen, setIsOpen] = useState(false);
-
-  // Styling for the container
-  const sidebarWidth = isOpen ? 'w-64' : 'w-20';
   
   return (
     <aside 
