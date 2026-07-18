@@ -1,7 +1,7 @@
 import { useActivity } from '../../hooks/useActivity';
 
 function Dashboard() {
-  const { activity } = useActivity();
+  const { activity, clearActivity } = useActivity();
   
   return (
     <div className="max-w-7xl mx-auto space-y-8">
@@ -44,9 +44,20 @@ function Dashboard() {
       {/* Activity Feed Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 border-t border-slate-800/60">
         <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800/60">
-          <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-            <span className="text-teal-400">🕒</span> Recent User Activity
-          </h3>
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <h3 className="text-white font-bold flex items-center gap-2">
+              <span className="text-teal-400">🕒</span> Recent User Activity
+            </h3>
+            {activity.users.length > 0 && (
+              <button
+                type="button"
+                onClick={() => clearActivity('users')}
+                className="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs font-semibold text-slate-200 transition-colors hover:bg-slate-900 hover:text-white"
+              >
+                Clear Search
+              </button>
+            )}
+          </div>
           {activity.users.length > 0 ? (
             <ul className="space-y-3">
               {activity.users.map(u => (

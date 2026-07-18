@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSettings } from '../../hooks/useThemeSettings';
 import { searchUsers } from '../../services/githubApi';
 
 function Search() {
+  const { settings } = useSettings();
   const [query, setQuery] = useState('');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const perPage = 10;
+  const perPage = settings.paginationSize;
   const cacheRef = useRef(new Map());
   const requestIdRef = useRef(0);
   const previousQueryRef = useRef('');
@@ -25,6 +27,15 @@ function Search() {
 
     return Math.max(1, Math.ceil(totalCount / perPage));
   }, [totalCount]);
+
+  useEffect(() => {
+    setPage(1);
+    setUsers([]);
+    setTotalCount(0);
+    setError('');
+    cacheRef.current.clear();
+    requestIdRef.current += 1;
+  }, [perPage]);
 
   const pageWindowStart = useMemo(() => {
     if (!totalPages) {

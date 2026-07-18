@@ -14,9 +14,16 @@ export function useActivity() {
     });
   }, []);
 
+  const clearActivity = useCallback((type) => {
+    setActivity(prev => ({
+      ...prev,
+      [type]: [],
+    }));
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('dev_activity', JSON.stringify(activity));
   }, [activity]);
 
-  return { activity, addActivity };
+  return { activity, addActivity, clearActivity };
 }
