@@ -44,6 +44,7 @@ async function request(endpoint) {
 // Module 2 & 3: Fetch User Data
 export const getUserProfile = (username) => request(`/users/${username}`);
 export const getUserRepos = (username) => request(`/users/${username}/repos?sort=updated`);
+export const searchUsers = (query) => request(`/search/users?q=${encodeURIComponent(query)}&per_page=12`);
 
 // Module 4: Fetch Repository Details
 export const getRepoDetails = (owner, repo) => request(`/repos/${owner}/${repo}`);
