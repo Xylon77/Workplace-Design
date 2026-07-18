@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { searchUsers } from '../../services/githubApi';
 
@@ -10,6 +10,9 @@ function Search() {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const perPage = 10;
+  const cacheRef = useRef(new Map());
+  const requestIdRef = useRef(0);
+  const previousQueryRef = useRef('');
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -23,6 +26,26 @@ function Search() {
     return Math.max(1, Math.ceil(totalCount / perPage));
   }, [totalCount]);
 
+  const pageWindowStart = useMemo(() => {
+    if (!totalPages) {
+      return 1;
+    }
+
+    return Math.floor((page - 1) / 5) * 5 + 1;
+  }, [page, totalPages]);
+
+  const pageWindowEnd = useMemo(() => {
+    if (!totalPages) {
+      return 1;
+    }
+
+    return Math.min(pageWindowStart + 4, totalPages);
+  }, [pageWindowStart, totalPages]);
+
+  const pageWindow = useMemo(() => {
+    return Array.from({ length: pageWindowEnd - pageWindowStart + 1 }, (_, index) => pageWindowStart + index);
+  }, [pageWindowStart, pageWindowEnd]);
+
   useEffect(() => {
     const trimmedQuery = query.trim();
 
@@ -31,23 +54,65 @@ function Search() {
       setError('');
       setTotalCount(0);
       setPage(1);
+      previousQueryRef.current = '';
       setLoading(false);
       return undefined;
     }
 
+    if (trimmedQuery !== previousQueryRef.current && page !== 1) {
+      previousQueryRef.current = trimmedQuery;
+      setPage(1);
+      return undefined;
+    }
+
+    previousQueryRef.current = trimmedQuery;
+
+    const cacheKey = `${trimmedQuery.toLowerCase()}::${page}::${perPage}`;
+    const cachedResult = cacheRef.current.get(cacheKey);
+
+    if (cachedResult) {
+      setUsers(cachedResult.items);
+      setTotalCount(cachedResult.totalCount);
+      setError('');
+      setLoading(false);
+      return undefined;
+    }
+
+    const requestId = ++requestIdRef.current;
     const timeoutId = window.setTimeout(async () => {
       setLoading(true);
       setError('');
 
       try {
         const data = await searchUsers(trimmedQuery, page, perPage);
-        setUsers(data.items ?? []);
-        setTotalCount(data.total_count ?? 0);
+
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
+        const nextItems = data.items ?? [];
+        const nextTotalCount = data.total_count ?? 0;
+
+        cacheRef.current.set(cacheKey, {
+          items: nextItems,
+          totalCount: nextTotalCount,
+        });
+
+        setUsers(nextItems);
+        setTotalCount(nextTotalCount);
       } catch (err) {
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
         setUsers([]);
         setTotalCount(0);
         setError(err instanceof Error ? err.message : 'Failed to search users.');
       } finally {
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
+
         setLoading(false);
       }
     }, 300);
@@ -109,20 +174,14 @@ function Search() {
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
+                  onClick={() => setPage((currentPage) => Math.max(1, currentPage - 5))}
                   disabled={page === 1}
                   className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Previous
                 </button>
 
-                {Array.from({ length: Math.min(totalPages, 5) }, (_, index) => {
-                  let pageNumber = index + 1;
-
-                  if (totalPages > 5 && page > 3) {
-                    pageNumber = Math.min(totalPages - 4 + index, totalPages);
-                  }
-
+                {pageWindow.map((pageNumber) => {
                   const isActive = pageNumber === page;
 
                   return (
@@ -139,7 +198,7 @@ function Search() {
 
                 <button
                   type="button"
-                  onClick={() => setPage((currentPage) => Math.min(totalPages, currentPage + 1))}
+                  onClick={() => setPage((currentPage) => Math.min(totalPages, currentPage + 5))}
                   disabled={page === totalPages}
                   className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
                 >
